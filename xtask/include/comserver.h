@@ -94,12 +94,13 @@ struct cs_data {
   struct mailbox *p_outbox;    /* list of mailboxes with pending sends (recipient not ready) */
   struct p_request *p_reqs;    /* pending ring bus replies */
   struct p_kreply k_replies[8]; /* pending kernel replies */
+  int ring;                    /* has ring bus? */
 };
 
 /* kernel communication information */
 struct cs_kernel {
-  chanend c_sync;              /* asynchronous channel (notification) */
-  chanend c_async;             /* synchronous channel (management messages) */
+  chanend c_sync;              /* synchronous channel (management messages) */
+  chanend c_async;             /* asynchronous channel (notification) */
   struct chan_event *event;    /* chanend event settings */
   struct cs_kernel *next;      /* list pointer */
   

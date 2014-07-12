@@ -63,7 +63,11 @@ void            xtask_delay_ticks(unsigned int ticks);
 
 #endif /* ndef __XC__ */
 
+#ifdef __XC__
+
 void xtask_comserver(chanend man_sync[], chanend man_async[], unsigned int nr_man_chan, 
-                     chanend ring_in, chanend ring_out, unsigned int id);
+                     chanend ?ring_in, chanend ?ring_out, unsigned int id);
+                  
+#endif /* def __XC__ */
 
 #endif /* XTASK_H */

@@ -65,21 +65,26 @@ void xtask_comserver(chanend      man_sync[],
   csdata->mailboxes = NULL;
   csdata->p_reqs    = NULL;
   csdata->p_outbox  = NULL;
-  csdata->ring_in   = ring_in;
-  csdata->ring_out  = ring_out;
   csdata->id        = id;
-
-  // ring_buf contains the buffer information for ring bus messages  
-  csdata->rbuf = malloc(sizeof(struct ring_buf));
-  csdata->rbuf->payload = malloc(512);
   
-  // chan_event contains the information needed by event vectors that execute upon receiving data
-  // this chan_event is for receiving messages from the ring bus
-  struct chan_event *ev = malloc(sizeof(struct chan_event));
-  ev->res    = ring_in;                     // chanend belonging to this chan_event
-  ev->vector = (void *)  _xtask_ring_vec;   // vector that is executed when data is available
-  ev->env    = (void *) csdata;             // address of csdata as environment vector
-  _xtask_set_chan_event((void *)ev);        // configure chanend and enable events on chanend
+  csdata->ring = (!ring_in || !ring_out) ? 0 : 1; // has ring bus?
+
+  if (csdata->ring) {
+    // ring_buf contains the buffer information for ring bus messages  
+    csdata->rbuf          = malloc(sizeof(struct ring_buf));
+    csdata->rbuf->payload = malloc(512);
+    
+    csdata->ring_in       = ring_in;
+    csdata->ring_out      = ring_out;
+  
+    // chan_event contains the information needed by event vectors that execute upon receiving data
+    // this chan_event is for receiving messages from the ring bus
+    struct chan_event *ev = malloc(sizeof(struct chan_event));
+    ev->res    = ring_in;                     // chanend belonging to this chan_event
+    ev->vector = (void *)  _xtask_ring_vec;   // vector that is executed when data is available
+    ev->env    = (void *) csdata;             // address of csdata as environment vector
+    _xtask_set_chan_event((void *)ev);        // configure chanend and enable events on chanend
+  }
 
   // initialize all management channels
   // for each management channel pair we allocate a kernel structure
@@ -197,6 +202,7 @@ unsigned int xtask_process_man_msg(struct cs_data *    csdata,
                                                           (void*)new_sp, 
                                                           (void*)((struct man_msg*)evt->data)->p2, 
                                                            b);
+                                                           
     // allocate and initialise new chan_event structure for hardware thread
     struct chan_event *new_ce = (struct chan_event*) malloc(sizeof(struct chan_event));
     new_ce->res = a;
@@ -507,6 +513,38 @@ unsigned int xtask_process_man_msg(struct cs_data *    csdata,
     */
     struct p_request **prp;
     
+    if (!csdata->ring) {
+      struct p_kreply *kr;
+      
+      // we don't have a ring bus, cannot create remote dedicated hardware thread
+      // add kernel reply to queue and notify kernel
+      kr = xtask_get_free_kreply(csdata);
+
+      if (kr != NULL) {
+        
+        struct cs_kernel *temp_k = csdata->kernels;
+    
+        // find the kernel that has the pending reply
+        while (temp_k != NULL) {
+          if (temp_k->c_sync == evt->res) {
+            break;
+          }
+    
+          temp_k = temp_k->next;
+        }
+        
+        kr->state    |= KR_USED;
+        kr->k         = temp_k;
+        kr->reply.cmd = 2;
+        kr->reply.p1  = ((struct man_msg*)evt->data)->p0;
+        kr->reply.p2 = 1; // return value, failure
+          
+        _xtask_notify_kernel(temp_k->c_async);
+      }
+      
+      return NO_REPLY;
+    }
+    
     // create a new virtual channel
     struct vchan *new_vchan = malloc(sizeof(struct vchan));
     new_vchan->own_chanend  = _xtask_get_chanend();
@@ -638,14 +676,14 @@ unsigned int xtask_process_man_msg(struct cs_data *    csdata,
 
         kr = xtask_get_free_kreply(csdata);
 
-        // add a new pending kernel reply for the recipient task
+        // add a new pending kernel reply for the sending task
         // and notify the kernel
         if (kr != NULL) {
           kr->state |= KR_USED;
           kr->k = send_mb->kernel;
           kr->reply.cmd = 0x04;
           kr->reply.p0 = send_mb->tid;
-          kr->reply.p1 = 1; /* return value.. delivery failed or not... */
+          kr->reply.p1 = 0; /* return value.. delivery failed or not... */
           
           _xtask_notify_kernel(send_mb->kernel->c_async);
         }
@@ -675,43 +713,61 @@ unsigned int xtask_process_man_msg(struct cs_data *    csdata,
     } else {
       // recipient is not on this tile, maybe on another tile
       // use the ring bus to inform other communication servers
+      // if we don't have a ring bus, add a pending kernel reply with error
       
-      struct p_request **prp;
-      struct p_request *pr;
-      unsigned int *pl = (unsigned int *)csdata->rbuf->payload;
+      if (!csdata->ring) {
+        struct p_kreply *kr;
+        kr = xtask_get_free_kreply(csdata);
 
-      send_mb->outbox_dest = receiver;
-
-      csdata->rbuf->cs_id = csdata->id;
-      csdata->rbuf->msg_type = 0x03;
-      csdata->rbuf->status = 0;
-      
-      // first 4 bytes = mailbox id, remaining = message
-      csdata->rbuf->payload_size = send_mb->outbox.data_size + 4;
+        // add a new pending kernel reply for the sending task
+        // and notify the kernel
+        if (kr != NULL) {
+          kr->state |= KR_USED;
+          kr->k = send_mb->kernel;
+          kr->reply.cmd = 0x04;
+          kr->reply.p0 = send_mb->tid;
+          kr->reply.p1 = 1; /* return value.. delivery failed or not... */
           
-      *pl = ((struct man_msg*)evt->data)->p1; // recipient mailbox id
-      pl++;
-
-      // copy outbox to ring bus payload buffer
-      memcpy(pl, send_mb->outbox.data, send_mb->outbox.data_size);
+          _xtask_notify_kernel(send_mb->kernel->c_async);
+        }
+      } else {
+        struct p_request **prp;
+        struct p_request *pr;
+        unsigned int *pl = (unsigned int *)csdata->rbuf->payload;
+  
+        send_mb->outbox_dest = receiver;
+  
+        csdata->rbuf->cs_id = csdata->id;
+        csdata->rbuf->msg_type = 0x03;
+        csdata->rbuf->status = 0;
+        
+        // first 4 bytes = mailbox id, remaining = message
+        csdata->rbuf->payload_size = send_mb->outbox.data_size + 4;
+            
+        *pl = ((struct man_msg*)evt->data)->p1; // recipient mailbox id
+        pl++;
+  
+        // copy outbox to ring bus payload buffer
+        memcpy(pl, send_mb->outbox.data, send_mb->outbox.data_size);
+        
+        _xtask_ring_send(csdata);
+        
+        // add pending reply from ring bus to the list
+        pr           = malloc(sizeof(struct p_request));
+        pr->tid      = send_mb->tid;
+        pr->msg_type = 0x03;
+        pr->data     = (void *)send_mb;
+        pr->kernel   = send_mb->kernel;
       
-      _xtask_ring_send(csdata);
-      
-      // add pending reply from ring bus to the list
-      pr           = malloc(sizeof(struct p_request));
-      pr->tid      = send_mb->tid;
-      pr->msg_type = 0x03;
-      pr->data     = (void *)send_mb;
-      pr->kernel   = send_mb->kernel;
-    
-      prp = &csdata->p_reqs;
-
-      while (*prp != NULL) {
-        prp = &(*prp)->next;
-      }
-
-      pr->next = *prp;
-      *prp = pr;
+        prp = &csdata->p_reqs;
+  
+        while (*prp != NULL) {
+          prp = &(*prp)->next;
+        }
+  
+        pr->next = *prp;
+        *prp = pr;
+      }        
     }
 
     return NO_REPLY;
@@ -796,7 +852,7 @@ unsigned int xtask_process_man_msg(struct cs_data *    csdata,
 
       } /* end check for local pending senders */
 
-      if (((struct man_msg*)evt->data)->p1 == ITC_ANYWHERE) {
+      if (((struct man_msg*)evt->data)->p1 == ITC_ANYWHERE && csdata->ring) {
         /* notify CS on other tiles that this task was/is ready to receive */
         csdata->rbuf->cs_id        = csdata->id;
         csdata->rbuf->msg_type     = 0x04;
@@ -1040,6 +1096,7 @@ void xtask_process_ring_msg (struct cs_data *csdata)
         struct p_request *pr;
         struct vchan *vc;
         unsigned int *pl = (unsigned int *)csdata->rbuf->payload;
+        struct p_kreply *kr;
         
         // the pending ring bus reply is in front of the list because we always receive
         // replies in order. We gain access again to the previously allocated virtual
@@ -1066,15 +1123,20 @@ void xtask_process_ring_msg (struct cs_data *csdata)
         csdata->vchans = vc;
         
         pr = csdata->p_reqs;
+        
+        // add kernel reply to queue and notify kernel
+        kr = xtask_get_free_kreply(csdata);
 
-        // send reply to kernel
-        // can we do this here?
-        // don't we need to use notifications?
-        struct man_msg msg;
-        msg.cmd = 2;
-        msg.p0 = vc->thread_chanend;
-        msg.p1 = pr->tid;
-        _xtask_send_man_msg(vc->kernel->c_async, (void *)&msg);
+        if (kr != NULL) {
+          kr->state    |= KR_USED;
+          kr->k         = vc->kernel;
+          kr->reply.cmd = 2;
+          kr->reply.p0  = vc->thread_chanend;
+          kr->reply.p1  = pr->tid;
+          kr->reply.p2 = 0; // return value, succeeded
+          
+          _xtask_notify_kernel(vc->kernel->c_async);
+        }
         
         // remove pending ring bus reply from list and release memory
         csdata->p_reqs = csdata->p_reqs->next;
@@ -1118,7 +1180,7 @@ void xtask_process_ring_msg (struct cs_data *csdata)
             kr->k         = reg->kernel;
             kr->reply.cmd = 0x04;
             kr->reply.p0  = reg->tid;
-            kr->reply.p1  = 1; // return value, delivery succeeded
+            kr->reply.p1  = 0; // return value, delivery succeeded
           
             _xtask_notify_kernel(reg->kernel->c_async);
           }
@@ -1231,7 +1293,7 @@ void xtask_process_ring_msg (struct cs_data *csdata)
             kr->reply.cmd = 0x03;
             kr->reply.p0  = recv_mb->tid;
             kr->reply.p1  = (unsigned int) &recv_mb->inbox;   
-          
+            
             _xtask_notify_kernel(recv_mb->kernel->c_async);
           }
 

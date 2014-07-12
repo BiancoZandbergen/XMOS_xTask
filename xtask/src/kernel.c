@@ -574,6 +574,7 @@ void xtask_not_handler(struct k_data *k)
        Unblock sending task
        msg.p0 = task id
        msg.p1 = pointer to vc_buf
+       msg.p2 = return value
     */
 
     struct task_entry **xpp;
@@ -594,7 +595,7 @@ void xtask_not_handler(struct k_data *k)
       return;
     }
     
-    // return pointer to vc_buf
+    // return value
     xp->kcall_params->p0 = msg.p1;
     
     // schedule unblocked task

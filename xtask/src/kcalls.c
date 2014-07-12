@@ -9,17 +9,17 @@
  * This file contains the majority of the API functions.                      *
  * More specific it contains the following functions:                         *
  *                                                                            *
- * xtask_delay_ticks          - delay task for number of kernel ticks           *
- * xtask_create_thread        - create new (same tile) ded. hardware thread     *
- * xtask_vc_receive           - receive from virtual channel                    *
- * xtask_vc_get_write_buf     - get virtual channel write buffer                *
- * xtask_vc_send              - send virtual channel write buffer               *
- * xtask_create_mailbox       - register mailbox for inter-task communication   *
- * xtask_create_remote_thread - create new (other tile) ded. hardware thread    *
- * xtask_get_outbox           - get mailbox outbox buffer                       *
- * xtask_send_outbox          - send outbox to recipient task                   *
- * xtask_get_inbox            - receive a message from another task             *
- * xtask_create_task          - create a new task                               *
+ * xtask_delay_ticks          - delay task for number of kernel ticks         *
+ * xtask_create_thread        - create new (same tile) ded. hardware thread   *
+ * xtask_vc_receive           - receive from virtual channel                  *
+ * xtask_vc_get_write_buf     - get virtual channel write buffer              *
+ * xtask_vc_send              - send virtual channel write buffer             *
+ * xtask_create_mailbox       - register mailbox for inter-task communication *
+ * xtask_create_remote_thread - create new (other tile) ded. hardware thread  *
+ * xtask_get_outbox           - get mailbox outbox buffer                     *
+ * xtask_send_outbox          - send outbox to recipient task                 *
+ * xtask_get_inbox            - receive a message from another task           *
+ * xtask_create_task          - create a new task                             *
  *                                                                            *
  ******************************************************************************/
 
@@ -258,8 +258,8 @@ struct vc_buf * xtask_get_outbox(unsigned int id)
  * Function:     xtask_send_outbox                                            *
  * Parameters:   sender    - sender mailbox id                                *
  *               receiver  - recipient mailbox id                             *
- * Return:       Currently returns 1. If the recipient does not exist,        *
- *               the sending task will be blocked forever.                    *
+ * Return:       Returns 0 when the message has been delivered. 1 when the    *
+ *               recipient could not be found.                                * 
  *                                                                            *
  *               Send outbox to recipient task. The sending task will be      *
  *               blocked until the recipient task has actively received the   *
