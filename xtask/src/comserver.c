@@ -1148,14 +1148,31 @@ void xtask_process_ring_msg (struct cs_data *csdata)
       
         if (csdata->rbuf->status == 0x00) {
           // recipient not found!
-          // remove pending ring bus reply from list and free memory
-          struct p_request *pr; 
+         
+          struct p_request *pr;
+          struct p_kreply *kr;
+          struct mailbox *reg; 
           
           pr = csdata->p_reqs;
+          reg = pr->data;
+                    
+          // add kernel reply to queue and notify kernel
+          kr = xtask_get_free_kreply(csdata);
+
+          if (kr != NULL) {
+            kr->state    |= KR_USED;
+            kr->k         = reg->kernel;
+            kr->reply.cmd = 0x04;
+            kr->reply.p0  = reg->tid;
+            kr->reply.p1  = 1; // return value, delivery failed
+          
+            _xtask_notify_kernel(reg->kernel->c_async);
+          }
+          
+          // remove pending ring bus reply from list and free memory
           csdata->p_reqs = csdata->p_reqs->next;
           free(pr);
           
-          // no reply to kernel, so task blocked forever?
           
         } else if (csdata->rbuf->status == 0x01) {
           // message delivered
