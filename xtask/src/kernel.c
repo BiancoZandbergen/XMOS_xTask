@@ -390,7 +390,7 @@ void xtask_kcall_handler(unsigned int        callnr,
     // we're done, schedule new task
     xtask_enqueue(kdata,pe);
     
-    kcall->p0 = 1; // always return 1
+    kcall->p0 = 0; // always return 0
   }
 }
 

@@ -1,0 +1,46 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[english]{babel}
+\usepackage[pdftex]{graphicx}
+\usepackage[a4paper]{geometry}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{mathptmx}
+\usepackage{mdwlist}
+\usepackage{listings}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{hyperref}
+
+\usepackage[intoc]{nomencl}
+
+\def\arraystretch{1.5} % vertical padding for tables
+
+\hypersetup{%
+pdftitle={xTask Programming Manual},
+pdfauthor={Bianco Zandbergen},
+pdfkeywords={xmos, xtask, operating system, multicore, distributed, api},
+bookmarksnumbered,
+pdfstartview={FitH},
+urlcolor=blue,
+colorlinks=true,
+linkcolor=black,
+citecolor=blue,
+bookmarksopen=true,
+pdfpagemode=UseOutlines,
+bookmarksopenlevel=2,
+linktocpage=false,
+}%
+
+% set up listings package
+\lstset{language=c}
+\lstset{basicstyle=\ttfamily}
+\lstset{keywordstyle=\color{blue}\bfseries}
+\lstset{commentstyle=\color{OliveGreen}}
+\lstset{showspaces=false}
+\lstset{frame=trbl}
+
+\begin{document}
+
+\input{./xtask_api.tex}
+
+\end{document}

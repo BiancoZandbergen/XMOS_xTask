@@ -1,0 +1,165 @@
+\newpage
+\section{Application Programming Interface}
+In this appendix we will describe the application programming interface that
+programmers should use to write applications on systems using the
+xTask Operating System.
+
+Applications that make use of the xTask API should include the following 
+header file: \verb|/include/xtask.h|.
+
+%-------------------------------------------------------------------------------
+%                              xtask_kernel
+%-------------------------------------------------------------------------------
+\subsection{xtask\_kernel}
+\noindent
+\textbf{void xtask\_kernel(init\_tasks, idle\_task, tick\_rate,
+notification\_chan, service\_chan)}\\\\
+Initialize and start a kernel. The kernel is connected to a 
+Communication Server through the service and notification channels.
+This function should be called in a \verb|par| statement from the main function 
+(using a C wrapper function to circumvent xC's dislike of function pointers).\\
+
+\noindent
+\textbf{Arguments:}\\
+\indent\begin{tabular}{ p{4.5cm}  p{9cm} }
+init\_tasks & Pointer to function that initializes all initial tasks.
+              This function has the signature: \verb|void function(void)|. \\
+idle\_task  & Pointer to idle task function.
+              This function has the signature: \verb|void function(void *)|.\\
+unsigned int
+tick\_rate  & kernel tick rate (by default in 10ns resolution).\\
+chanend
+notification\_chan & channel for notifications from Communication Server.\\
+chanend
+service\_chan      & channel to get service from Communication Server.
+\end{tabular}\\\\
+
+\noindent
+\textbf{Return value:}\\
+\indent\begin{tabular}{  p{4.5cm}  p{9cm} }
+void & \\
+\end{tabular}
+
+%-------------------------------------------------------------------------------
+%                              xtask_comserver
+%-------------------------------------------------------------------------------
+\subsection{xtask\_comserver}
+\noindent
+\textbf{void xtask\_comserver(service\_chan[], noficication\_chan[], nr\_kernels, 
+        ring\_in, ring\_out, id)}\\\\
+Initialize and start the communication server.
+This function should be called in a \verb|par| statement from the main function.\\
+
+\noindent
+\textbf{Arguments:}\\
+\indent\begin{tabular}{ p{4.5cm}  p{9cm} }
+service\_chan[]      & Array with the service channels connecting 
+                       to each kernel.\\
+notification\_chan[] & Array with the notification channels connecting
+                       to each kernel.\\
+unsigned int
+nr\_kernels          & Number of kernels connected to this Communication Server.
+                       \verb|service_chan[]| and \verb|notification_chan[]|
+                       should have \verb|nr_kernels| elements.\\
+chanend
+ring\_in             & Ring bus incoming chanend. This value can be \verb|null|
+                       to disable ring bus. If either \verb|ring_in| 
+                       or \verb|ring_out| is \verb|null|,
+                       the ring bus will not be enabled.\\
+chanend
+ring\_in             & Ring bus incoming chanend. This value can be \verb|null|
+                       to disable ring bus. If either \verb|ring_in| 
+                       or \verb|ring_out| is \verb|null|,
+                       the ring bus will not be enabled.\\
+unsigned int id      & Globally unique ID for Communication Server.
+\end{tabular}\\\\
+
+\noindent
+\textbf{Return value:}\\
+\indent\begin{tabular}{  p{4.5cm}  p{9cm} }
+void & \\
+\end{tabular}
+
+%-------------------------------------------------------------------------------
+%                              xtask_create_init_task
+%-------------------------------------------------------------------------------
+\begin{samepage}
+\subsection{xtask\_create\_init\_task}
+\noindent
+\textbf{int xtask\_create\_init\_task(code, stack\_size, priority, tid, args)}\\\\
+Create an initial task (before the Operating System starts). One or more of these
+function calls should be wrapped in another function and passed to 
+\verb|xtask_kernel()|.\\
+
+\noindent
+\textbf{Arguments:}\\
+\indent\begin{tabular}{ p{4.5cm}  p{9cm} }
+code                     & Pointer to the function that should be ran as a task.
+                           The function has the following signature: 
+                           \verb|void function(void *)|.\\
+unsigned int stack\_size & Stack size in 32-bit words.\\
+unsigned int priority    & Task priority, a number between 0 and 6. Lower number
+                           means higher priority.\\
+unsigned int tid         & Unique task ID.\\
+void * args              & Arguments passed to the new task (can be NULL).
+\end{tabular}\\\\
+
+\noindent
+\textbf{Return value:}\\
+\indent\begin{tabular}{  p{4.5cm}  p{9cm} }
+0 & Always returns 0 currently. \\
+\end{tabular}
+\end{samepage}
+
+%-------------------------------------------------------------------------------
+%                              xtask_create_task
+%-------------------------------------------------------------------------------
+\begin{samepage}
+\subsection{xtask\_create\_task}
+\noindent
+\textbf{int xtask\_create\_task(code, stack\_size, priority, tid, args)}\\\\
+Create a new task by another task.\\
+
+\noindent
+\textbf{Arguments:}\\
+\indent\begin{tabular}{ p{4.5cm}  p{9cm} }
+code                     & Pointer to the function that should be ran as a task.
+                           The function has the following signature: 
+                           \verb|void function(void *)|.\\
+unsigned int stack\_size & Stack size in 32-bit words.\\
+unsigned int priority    & Task priority, a number between 0 and 6. Lower number
+                           means higher priority.\\
+unsigned int tid         & Unique task ID.\\
+void * args              & Arguments passed to the new task (can be NULL).
+\end{tabular}\\\\
+
+\noindent
+\textbf{Return value:}\\
+\indent\begin{tabular}{  p{4.5cm}  p{9cm} }
+0 & Always returns 0 currently. \\
+\end{tabular}
+\end{samepage}
+
+%-------------------------------------------------------------------------------
+%                              xtask_delay_ticks
+%-------------------------------------------------------------------------------
+\begin{samepage}
+\subsection{xtask\_delay\_ticks}
+\noindent
+\textbf{void xtask\_delay\_ticks(unsigned int ticks)}\\\\
+Delay task for a certain amount of kernel ticks. The task will not be scheduled
+while it is delayed, giving other tasks the oportunity to run.\\
+
+\noindent
+\textbf{Arguments:}\\
+\indent\begin{tabular}{ p{4.5cm}  p{9cm} }
+ticks & Number of kernel ticks to delay the task.
+\end{tabular}\\\\
+
+\noindent
+\textbf{Return value:}\\
+\indent\begin{tabular}{  p{4.5cm}  p{9cm} }
+void \\
+\end{tabular}
+\end{samepage}
+

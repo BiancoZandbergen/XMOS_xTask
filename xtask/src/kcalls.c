@@ -317,7 +317,7 @@ struct vc_buf * xtask_get_inbox(unsigned int id,
  *               tid          - Task id, must be unique                       *
  *               args         - Pointer to argument buffer (or use the        *
  *                              pointer value itself as argument)             *
- * Return:       Currently always returns 1                                   *
+ * Return:       Currently always returns 0                                   *
  *                                                                            *
  *               Create a new task at run time by another task.               *
  ******************************************************************************/

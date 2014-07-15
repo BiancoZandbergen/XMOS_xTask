@@ -9,9 +9,9 @@
  * This file contains some task related functions.                            *
  * More specific it contains the following functions:                         *
  *                                                                            *
- * xtask_create_init_task  - create initial task                                *
- * enqueue               - add task to scheduling queues                      *
- * xtask_pick_task             - pick next task to run (scheduler)                  *
+ * xtask_create_init_task  - create initial task                              *
+ * xtask_enqueue           - add task to scheduling queues                    *
+ * xtask_pick_task         - pick next task to run (scheduler)                *
  *                                                                            *
  ******************************************************************************/
 #include <stdlib.h>
@@ -19,7 +19,7 @@
 #include "../include/kernel.h"
 
  /*****************************************************************************
- * Function:     xtask_create_init_task                                         *
+ * Function:     xtask_create_init_task                                       *
  * Parameters:   code         - Pointer to the function that the task will    *
  *                              execute. This function must return void and   *
  *                              accept a void * as argument                   *
@@ -29,15 +29,15 @@
  *               tid          - Task id, must be unique                       *
  *               args         - Pointer to argument buffer (or use the        *
  *                              pointer value itself as argument)             *
- * Return:       Currently always returns 1                                   *
+ * Return:       Currently always returns 0                                   *
  *                                                                            *
  *               Create initial task (before the operating system starts).    *
  ******************************************************************************/  
 int xtask_create_init_task(task_code    code, 
-                         unsigned int stack_size, 
-                         unsigned int priority, 
-                         unsigned int tid, 
-                         void *       args)
+                           unsigned int stack_size, 
+                           unsigned int priority, 
+                           unsigned int tid, 
+                           void *       args)
 {
   struct task_entry *pe = malloc(sizeof(struct task_entry));
 
@@ -65,11 +65,11 @@ int xtask_create_init_task(task_code    code,
   // add task to the right scheduling queue
   xtask_enqueue(_xtask_get_kdata(),pe);
 
-  return 1;
+  return 0;
 }
 
  /*****************************************************************************
- * Function:     enqueue                                                      *
+ * Function:     xtask_enqueue                                                *
  * Parameters:   kdata  - pointer to kdata structure                          *
  *               proc   - pointer to the task_entry structure of the task     *
  *                        that needs to be added to the scheduling queue      * 
@@ -93,7 +93,7 @@ void xtask_enqueue(struct k_data *kdata, struct task_entry *proc)
 }
 
  /*****************************************************************************
- * Function:     xtask_pick_task                                                    *
+ * Function:     xtask_pick_task                                              *
  * Parameters:   kdata  - pointer to kdata structure                          *
  * Return:       void                                                         *
  *                                                                            *
@@ -121,33 +121,4 @@ void xtask_pick_task(struct k_data* kdata)
   }
 }
 
-/**
- * Debug function to print all tasks
- * in the scheduling queues
- */  
-void dump_queues(struct k_data *kdata)
-{
-  int i;
-  struct task_entry *p;
 
-  //printf("dump_queues\n");  
-
-  if (kdata->current_task == NULL) {
-    printf("current_task: none\n");
-  }  else {
-    printf("current_task: %u\n",kdata->current_task->tid);
-  }
-
-  for (i=0; i<8; i++) {
-    p = kdata->sched_head[i];
-
-    //if (p == NULL) printf("Q: %d empty\n",i);
-
-    while(p != NULL) {
-      printf("Q: %d, tid: %u prio: %u ss: %u\n",i,p->tid,p->priority,p->stack_size);
-      p = p->next;  
-    }
-
-  }
-  printf("--\n");
-}
