@@ -175,7 +175,7 @@ struct vc_buf * xtask_vc_send(struct vc_buf *buf)
  *                             Must be unique system wide.                    *
  *               inbox_size  - Inbox size in bytes.                           *
  *               outbox_size - Outbox size in bytes.                          *
- * Return:       Always returns 1 currently.                                  *
+ * Return:       Always returns 0 currently.                                  *
  *                                                                            *
  *               Create a new mailbox for inter-task communication.           *
  ******************************************************************************/

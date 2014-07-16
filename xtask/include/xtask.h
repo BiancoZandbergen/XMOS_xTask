@@ -18,6 +18,9 @@
 #define ITC_LOCAL      1
 #define ITC_ANYWHERE   2
 
+#define LOCAL_TILE 1
+#define ALL_TILES  2
+
 typedef void (*task_code)(void *);
 typedef void (*init_code)(void);
 typedef void (*hwt_code)(void *, chanend);
@@ -53,6 +56,7 @@ struct vc_buf * xtask_vc_receive(unsigned int handle, unsigned int min_size);
 
 unsigned int    xtask_create_mailbox(unsigned int id, 
                   unsigned int inbox_size, unsigned int outbox_size);
+                  
 struct vc_buf * xtask_get_outbox(unsigned int id);
 
 unsigned int    xtask_send_outbox(unsigned int sender, unsigned int receiver);

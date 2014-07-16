@@ -497,7 +497,7 @@ unsigned int xtask_process_man_msg(struct cs_data *    csdata,
     reg->next = csdata->mailboxes;
     csdata->mailboxes = reg;
 
-    ((struct man_msg*)evt->data)->p0 = 1; // returns 1 for now
+    ((struct man_msg*)evt->data)->p0 = 0; // returns 0 for now
   
     return REPLY;
   
