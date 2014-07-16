@@ -36,8 +36,8 @@ service\_chan      & channel to get service from Communication Server.
 
 \noindent
 \textbf{Return value:}\\
-\indent\begin{tabular}{  p{4.5cm}  p{9cm} }
-void & \\
+\indent\begin{tabular}{  p{13.5cm} }
+This function never returns, it will switch to the first task to be ran.
 \end{tabular}
 
 %-------------------------------------------------------------------------------
@@ -76,8 +76,8 @@ unsigned int id      & Globally unique ID for Communication Server.
 
 \noindent
 \textbf{Return value:}\\
-\indent\begin{tabular}{  p{4.5cm}  p{9cm} }
-void & \\
+\indent\begin{tabular}{  p{13.5cm} }
+This function never returns, it will process events infinitely.
 \end{tabular}
 
 %-------------------------------------------------------------------------------
@@ -160,6 +160,114 @@ ticks & Number of kernel ticks to delay the task.
 \textbf{Return value:}\\
 \indent\begin{tabular}{  p{4.5cm}  p{9cm} }
 void \\
+\end{tabular}
+\end{samepage}
+
+%-------------------------------------------------------------------------------
+%                              xtask_create_mailbox
+%-------------------------------------------------------------------------------
+\begin{samepage}
+\subsection{xtask\_create\_mailbox}
+\noindent
+\textbf{unsigned int xtask\_create\_mailbox(id, inbox\_size, outbox\_size)}\\\\
+Create a new mailbox for inter-task communication.\\
+
+\noindent
+\textbf{Arguments:}\\
+\indent\begin{tabular}{ p{4.5cm}  p{9cm} }
+unsigned int id          & Globally unique mailbox identifier.\\
+unsigned int inbox\_size  & Size of inbox in bytes.            \\
+unsigned int outbox\_size & size of outbox in bytes.           
+\end{tabular}\\\\
+
+\noindent
+\textbf{Return value:}\\
+\indent\begin{tabular}{  p{4.5cm}  p{9cm} }
+0 & Currently always returns 0. \\
+\end{tabular}
+\end{samepage}
+
+%-------------------------------------------------------------------------------
+%                              xtask_get_outbox
+%-------------------------------------------------------------------------------
+\begin{samepage}
+\subsection{xtask\_get\_outbox}
+\noindent
+\textbf{struct vc\_buf *  xtask\_get\_outbox(id)}\\\\
+Get access to outbox buffer.\\
+
+\noindent
+\textbf{Arguments:}\\
+\indent\begin{tabular}{ p{4.5cm}  p{9cm} }
+unsigned int id          & Globally unique mailbox identifier.           
+\end{tabular}\\\\
+
+\noindent
+\textbf{Return value:}\\
+\indent\begin{tabular}{  p{13.5cm} }
+Pointer to vc\_buf structure that contains the buffer information.
+\end{tabular}
+\end{samepage}
+
+%-------------------------------------------------------------------------------
+%                              xtask\_send\_outbox
+%-------------------------------------------------------------------------------
+\begin{samepage}
+\subsection{xtask\_send\_outbox}
+\noindent
+\textbf{unsigned int xtask\_send\_outbox(sender, recipient)}\\\\
+Send outbox to recipient. The sending task will be blocked until the message
+is delivered to the recipient task and the recipient task has actively received it.\\
+
+\noindent
+\textbf{Arguments:}\\
+\indent\begin{tabular}{ p{4.5cm}  p{9cm} }
+unsigned int sender    & Globally unique mailbox identifier of sender.\\
+unsigned int recipient & Globally unique mailbox identifier of recipient.\\          
+\end{tabular}\\\\
+
+\noindent
+\textbf{Return value:}\\
+\indent\begin{tabular}{  p{4.5cm}  p{9cm} }
+0 & Message delivered. \\
+1 & Recipient could not be found. 
+\end{tabular}
+\end{samepage}
+
+%-------------------------------------------------------------------------------
+%                              xtask_get_inbox
+%-------------------------------------------------------------------------------
+\begin{samepage}
+\subsection{xtask\_get\_outbox}
+\noindent
+\textbf{struct vc\_buf * xtask\_get\_inbox(id, location)}\\\\
+Receive a message. The task will be blocked if no message is available.\\
+
+\noindent
+\textbf{Arguments:}\\
+\indent\begin{tabular}{ p{4.5cm}  p{9cm} }
+unsigned int id          & Globally unique mailbox identifier. \\
+unsigned int location    & Location can be \verb|LOCAL_TILE| or \verb|ALL_TILES|.
+                           If one or more tasks have tried to send a message 
+                           while the recipient task was not waiting for it, 
+                           a flag will be  set in the recipient task's mailbox 
+                           to indicate that another task tried to send a message.
+                           When the recipient task calls this function it will 
+                           inform all tasks that tried to send a message that it
+                           is now ready to receive a message. If \verb|LOCAL_TILE|
+                           is given as argument it will only search for pending
+                           senders that make use of the same Communication Server.
+                           If \verb|ALL_TILES| is given, the ring bus will be used
+                           to inform all Communication Servers. If all possible
+                           sending tasks make use of the same Communication Server,
+                           \verb|LOCAL_TILE| should be used.           
+\end{tabular}\\\\
+
+\noindent
+\textbf{Return value:}\\
+\indent\begin{tabular}{  p{13.5cm} }
+Pointer to vc\_buf structure that contains the
+buffer information of the received message.
 \end{tabular}
 \end{samepage}
 
