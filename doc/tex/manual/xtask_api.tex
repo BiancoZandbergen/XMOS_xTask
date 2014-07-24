@@ -271,3 +271,154 @@ buffer information of the received message.
 \end{tabular}
 \end{samepage}
 
+%-------------------------------------------------------------------------------
+%                              xtask_create_thread
+%-------------------------------------------------------------------------------
+\begin{samepage}
+\subsection{xtask\_create\_thread}
+\noindent
+\textbf{unsigned int xtask\_create\_thread(code, stackwords, args, obj\_size, rx\_buf\_size, tx\_buf\_size)}\\\\
+Create a new dedicated hardware thread (local, same tile).\\
+
+\noindent
+\textbf{Arguments:}\\
+\indent\begin{tabular}{ p{4.5cm}  p{9cm} }
+code                        & Pointer to the function that should be ran as a
+                              dedicated hardware thread.
+                              The function has the following signature: 
+                              \verb|void function(void *, chanend)|.\\
+unsigned int stackwords     & Stack size in 4-byte words.\\
+void * args                 & Arguments passed to the new task (can be NULL).\\
+unsigned int obj\_size      & Size in bytes of objects transferred through 
+                              the channel.
+                              Must be a multiple of 4 bytes.\\
+unsigned int rx\_buf\_size  & Receive buffer size. Must be a multiple of obj\_size.\\
+unsigned int tx\_buf\_size  & Transfer buffer size. Must be a multiple of obj\_size.       
+\end{tabular}\\\\
+
+\noindent
+\textbf{Return value:}\\
+\indent\begin{tabular}{  p{13.5cm} }
+A handle to the new dedicated hardware thread.
+\end{tabular}
+\end{samepage}
+
+%-------------------------------------------------------------------------------
+%                              xtask_create_remote_thread
+%-------------------------------------------------------------------------------
+\begin{samepage}
+\subsection{xtask\_create\_remote\_thread}
+\noindent
+\textbf{unsigned int xtask\_create\_remote\_thread(code, stackwords, args, obj\_size, rx\_buf\_size, tx\_buf\_size)}\\\\
+Create a new dedicated hardware thread (different tile).\\
+\textbf{This function is highly expirimental!}\\
+
+\noindent
+\textbf{Arguments:}\\
+\indent\begin{tabular}{ p{4.5cm}  p{9cm} }
+unsigned int code           & Function number to execute (not a function pointer!).
+                              The function has the following signature: 
+                              \verb|void function(void *, chanend)|.\\
+unsigned int stackwords     & Stack size in 4-byte words.\\
+void * args                 & Arguments passed to the new task (can be NULL).\\
+unsigned int obj\_size      & Size in bytes of objects transferred through 
+                              the channel.
+                              Must be a multiple of 4 bytes.\\
+unsigned int rx\_buf\_size  & Receive buffer size. Must be a multiple of obj\_size.\\
+unsigned int tx\_buf\_size  & Transfer buffer size. Must be a multiple of obj\_size.       
+\end{tabular}\\\\
+
+\noindent
+\textbf{Return value:}\\
+\indent\begin{tabular}{  p{13.5cm} }
+A handle to the new dedicated hardware thread.
+\end{tabular}
+\end{samepage}
+
+%-------------------------------------------------------------------------------
+%                              xtask_vc_get_write_buf
+%-------------------------------------------------------------------------------
+\begin{samepage}
+\subsection{xtask\_vc\_get\_write\_buf}
+\noindent
+\textbf{struct vc\_buf * xtask\_vc\_get\_write\_buf(handle)}\\\\
+Receive a write buffer that can be filled by the task and
+transmitted to the dedicated hardware thread. This function
+should only be called once prior to the first transmission
+to the dedicated hardware thread. The function that sends
+the buffer to the dedicated hardware thread will return a
+new empty buffer.\\
+
+\noindent
+\textbf{Arguments:}\\
+\indent\begin{tabular}{ p{4.5cm}  p{9cm} }
+unsigned int handle      & Dedicated hardware thread handle. \\           
+\end{tabular}\\\\
+
+\noindent
+\textbf{Return value:}\\
+\indent\begin{tabular}{  p{13.5cm} }
+A pointer to a vc\_buf struct that contains the information
+about the buffer that can be filled by the task and
+transmitted to the dedicated hardware thread.
+Null pointer when no buffer was available but this should
+not happen in regular operation.
+\end{tabular}
+\end{samepage}
+
+%-------------------------------------------------------------------------------
+%                              xtask_vc_receive
+%-------------------------------------------------------------------------------
+\begin{samepage}
+\subsection{xtask\_vc\_receive}
+\noindent
+\textbf{struct vc\_buf * xtask\_vc\_receive(handle, min\_size)}\\\\
+Receive from a hardware thread through a virtual channel.
+The task will block if there is no (sufficient) data available.\\
+
+\noindent
+\textbf{Arguments:}\\
+\indent\begin{tabular}{ p{4.5cm}  p{9cm} }
+unsigned int handle      & Dedicated hardware thread handle. \\ 
+unsigned int min\_size   & Minimum amount of data to receive in
+                           bytes. If set to 0, the minimum amount
+                           is a full buffer.           
+\end{tabular}\\\\
+
+\noindent
+\textbf{Return value:}\\
+\indent\begin{tabular}{  p{13.5cm} }
+Pointer to a vc\_buf struct which contains all the
+information about the buffer such as the actual pointer to
+the buffer and the amount of data in the buffer.
+\end{tabular}
+\end{samepage}
+
+%-------------------------------------------------------------------------------
+%                              xtask_vc_send
+%-------------------------------------------------------------------------------
+\begin{samepage}
+\subsection{xtask\_vc\_send}
+\noindent
+\textbf{struct vc\_buf * xtask\_vc\_send(buf)}\\\\
+Instruct the Communication Server to send the write buffer
+to the dedicated hardware thread. Receive a new empty
+write buffer that can be immediately filled by the task.\\
+
+\noindent
+\textbf{Arguments:}\\
+\indent\begin{tabular}{ p{4.5cm}  p{9cm} }
+struct vc\_buf * buf      & Pointer to write buffer.\\            
+\end{tabular}\\\\
+
+\noindent
+\textbf{Return value:}\\
+\indent\begin{tabular}{  p{13.5cm} }
+A pointer to a vc\_buf struct that contains the information
+about the buffer that can be filled by the task and
+transmitted to the dedicated hardware thread.
+Null pointer when no buffer was available but this should
+not happen in regular operation.
+\end{tabular}
+\end{samepage}
+
