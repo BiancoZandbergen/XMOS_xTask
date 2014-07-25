@@ -341,3 +341,14 @@ int xtask_create_task(task_code    code,
 
   return (int)kcall_params.p0;  
 }
+
+void xtask_exit(unsigned int status)
+{    
+  struct kcall_data kcall_params;
+  struct kcall_data *p = &kcall_params;
+  
+  kcall_params.p0 = (unsigned int) status;
+  
+  __asm__ volatile ("add r0, %0, 0"::"r"(p));
+  __asm__ volatile ("kcall 12");  
+}

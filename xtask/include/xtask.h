@@ -65,6 +65,8 @@ struct vc_buf * xtask_get_inbox(unsigned int id, unsigned int location);
 
 void            xtask_delay_ticks(unsigned int ticks);
 
+void            xtask_exit(unsigned int status);
+
 #endif /* ndef __XC__ */
 
 #ifdef __XC__

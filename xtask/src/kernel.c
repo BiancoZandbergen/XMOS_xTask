@@ -391,6 +391,16 @@ void xtask_kcall_handler(unsigned int        callnr,
     xtask_enqueue(kdata,pe);
     
     kcall->p0 = 0; // always return 0
+  } else if (callnr == 12) {
+    /* task exit */
+    free(kdata->current_task->bottom_stack);
+    free(kdata->current_task);
+    
+    // pick next task
+    kdata->current_task = NULL;
+    xtask_pick_task(kdata);
+    
+    // need to check for other resources such as mailboxes etc
   }
 }
 
