@@ -422,3 +422,26 @@ not happen in regular operation.
 \end{tabular}
 \end{samepage}
 
+%-------------------------------------------------------------------------------
+%                              xtask_exit
+%-------------------------------------------------------------------------------
+\begin{samepage}
+\subsection{xtask\_exit}
+\noindent
+\textbf{void xtask\_exit(status)}\\\\
+Exit task.\\
+
+\noindent
+\textbf{Arguments:}\\
+\indent\begin{tabular}{ p{4.5cm}  p{9cm} }
+unsigned int status      & Exit status code. Reserved for future use.\\            
+\end{tabular}\\\\
+
+\noindent
+\textbf{Return value:}\\
+\indent\begin{tabular}{  p{13.5cm} }
+This function does not return. The task will be halted and its resources freed.
+The scheduler will pick the next task to run.
+\end{tabular}
+\end{samepage}
+
