@@ -342,6 +342,14 @@ int xtask_create_task(task_code    code,
   return (int)kcall_params.p0;  
 }
 
+/******************************************************************************
+ * Function:     xtask_exit                                                   *
+ * Parameters:   status       - Exit status code. Reserved for future use.    *
+ * Return:       This function does not return. The calling task will be      *
+ *               halted and its resources will be freed.                      * 
+ *                                                                            *
+ *               Exit task.                                                   *
+ ******************************************************************************/
 void xtask_exit(unsigned int status)
 {    
   struct kcall_data kcall_params;
