@@ -20,6 +20,7 @@
  * xtask_send_outbox          - send outbox to recipient task                 *
  * xtask_get_inbox            - receive a message from another task           *
  * xtask_create_task          - create a new task                             *
+ * xtask_exit                 - exit from task                                * 
  *                                                                            *
  ******************************************************************************/
 
@@ -43,7 +44,7 @@ void xtask_delay_ticks(unsigned int ticks)
   kcall_params.p0 = ticks;
 
   __asm__ volatile ("add r0, %0, 0"::"r"(p));
-  asm("kcall 1");
+  asm("kcall 0");
 }
 
 /******************************************************************************
@@ -83,7 +84,7 @@ unsigned int xtask_create_thread(hwt_code     pc,
   kcall_params.p5 = (unsigned int) tx_buf_size;
 
   __asm__ volatile ("add r0, %0, 0"::"r"(p));
-  __asm__ volatile ("kcall 2");
+  __asm__ volatile ("kcall 1");
 
   return kcall_params.p0; 
 }
@@ -111,7 +112,7 @@ struct vc_buf * xtask_vc_receive(unsigned int handle,
   kcall_params.p1 = min_size;
   
   __asm__ volatile ("add r0, %0, 0"::"r"(p));
-  __asm__ volatile ("kcall 3");
+  __asm__ volatile ("kcall 2");
 
   return (struct vc_buf *)kcall_params.p0;  
 }
@@ -139,7 +140,7 @@ struct vc_buf * xtask_vc_get_write_buf(unsigned int handle)
   kcall_params.p0 = handle;
 
   __asm__ volatile ("add r0, %0, 0"::"r"(p));
-  __asm__ volatile ("kcall 4");
+  __asm__ volatile ("kcall 3");
 
   return (struct vc_buf *)kcall_params.p0;
 }
@@ -164,7 +165,7 @@ struct vc_buf * xtask_vc_send(struct vc_buf *buf)
   kcall_params.p0 = (unsigned int)buf;
 
   __asm__ volatile ("add r0, %0, 0"::"r"(p));
-  __asm__ volatile ("kcall 5");
+  __asm__ volatile ("kcall 4");
 
   return (struct vc_buf *)kcall_params.p0;
 }
@@ -190,7 +191,7 @@ unsigned int xtask_create_mailbox(unsigned int id,
   kcall_params.p2 = outbox_size;
   
   __asm__ volatile ("add r0, %0, 0"::"r"(p));
-  __asm__ volatile ("kcall 6");
+  __asm__ volatile ("kcall 5");
 
   return kcall_params.p0;
 }
@@ -228,7 +229,7 @@ unsigned int xtask_create_remote_thread(unsigned int code,
   kcall_params.p4 = (unsigned int) tx_buf_size;
 
   __asm__ volatile ("add r0, %0, 0"::"r"(p));
-  __asm__ volatile ("kcall 7");
+  __asm__ volatile ("kcall 6");
 
   return kcall_params.p0; 
 }
@@ -249,7 +250,7 @@ struct vc_buf * xtask_get_outbox(unsigned int id)
   kcall_params.p0 = id;
   
   __asm__ volatile ("add r0, %0, 0"::"r"(p));
-  __asm__ volatile ("kcall 8");
+  __asm__ volatile ("kcall 7");
 
   return (struct vc_buf *) kcall_params.p0; 
 }
@@ -275,7 +276,7 @@ unsigned int xtask_send_outbox(unsigned int sender,
   kcall_params.p1 = receiver;
   
   __asm__ volatile ("add r0, %0, 0"::"r"(p));
-  __asm__ volatile ("kcall 9");
+  __asm__ volatile ("kcall 8");
 
   return kcall_params.p0; 
 }
@@ -301,7 +302,7 @@ struct vc_buf * xtask_get_inbox(unsigned int id,
   kcall_params.p1 = location;
   
   __asm__ volatile ("add r0, %0, 0"::"r"(p));
-  __asm__ volatile ("kcall 10");
+  __asm__ volatile ("kcall 9");
 
   return (struct vc_buf *) kcall_params.p0; 
 }
@@ -337,7 +338,7 @@ int xtask_create_task(task_code    code,
   kcall_params.p4 = (unsigned int) args;
   
   __asm__ volatile ("add r0, %0, 0"::"r"(p));
-  __asm__ volatile ("kcall 11");
+  __asm__ volatile ("kcall 10");
 
   return (int)kcall_params.p0;  
 }
@@ -358,5 +359,5 @@ void xtask_exit(unsigned int status)
   kcall_params.p0 = (unsigned int) status;
   
   __asm__ volatile ("add r0, %0, 0"::"r"(p));
-  __asm__ volatile ("kcall 12");  
+  __asm__ volatile ("kcall 11");  
 }
