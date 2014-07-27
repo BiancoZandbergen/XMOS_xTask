@@ -1,4 +1,4 @@
-# Makefile for the FreeRTOS XMOS XS1 port.
+# Makefile for the xTask Operating System.
 # Works on GNU/Linux and Mac OS X.
 # Might need modification on Windows.
 
