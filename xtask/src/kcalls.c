@@ -285,7 +285,7 @@ unsigned int xtask_send_outbox(unsigned int sender,
  * Function:     xtask_get_inbox                                              *
  * Parameters:   id       - mailbox id                                        *
  *               location - Check for pending senders on local                *
- *                          CS (ITC_LOCAL) or everywhere (ITC_ANYWHERE).      *
+ *                          CS (LOCAL_TILE) or everywhere (ALL_TILES).        *
  * Return:       Pointer to a vc_buf struct which contains all the            *
  *               information about the buffer such as the actual pointer to   *
  *               the buffer and the amount of data in the buffer.             *

@@ -49,7 +49,7 @@ void task_2(void *p)
   xtask_create_mailbox(TASK2_MAILBOX, INBOX_SIZE, OUTBOX_SIZE);
   
   while(1) {
-    buf = xtask_get_inbox(TASK2_MAILBOX, ITC_LOCAL);
+    buf = xtask_get_inbox(TASK2_MAILBOX, LOCAL_TILE);
     data = (unsigned int *) buf->data;
     printf("%u bytes received, value: %u\n", buf->data_size, *data);
   }

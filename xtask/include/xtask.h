@@ -15,9 +15,7 @@
 #ifndef __XC__
 #include <xccompat.h>
 
-#define ITC_LOCAL      1
-#define ITC_ANYWHERE   2
-
+/* look for pending senders on local CS or all CS */
 #define LOCAL_TILE 1
 #define ALL_TILES  2
 

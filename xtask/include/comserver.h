@@ -19,6 +19,9 @@
 #define KR_FREE 0x00
 #define KR_USED 0x01
 
+// look for pending senders on local CS or all CS
+#define LOCAL_TILE 1
+#define ALL_TILES  2
 
 // send reply back to kernel or not
 #define REPLY    1
@@ -68,10 +71,6 @@ struct man_msg {
 #ifndef __XC__
 #include <xccompat.h>
 #include "../include/kernel.h"
-
-/* look for pending senders on local CS or all CS */
-#define ITC_LOCAL     1
-#define ITC_ANYWHERE  2
 
 /* pending kernel reply */
 struct p_kreply {

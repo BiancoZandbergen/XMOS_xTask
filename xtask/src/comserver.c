@@ -852,7 +852,7 @@ unsigned int xtask_process_man_msg(struct cs_data *    csdata,
 
       } /* end check for local pending senders */
 
-      if (((struct man_msg*)evt->data)->p1 == ITC_ANYWHERE && csdata->ring) {
+      if (((struct man_msg*)evt->data)->p1 == ALL_TILES && csdata->ring) {
         /* notify CS on other tiles that this task was/is ready to receive */
         csdata->rbuf->cs_id        = csdata->id;
         csdata->rbuf->msg_type     = 0x04;

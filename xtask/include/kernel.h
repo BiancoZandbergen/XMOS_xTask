@@ -57,9 +57,9 @@ struct k_data {
   struct task_entry *block_head;      /* head of list of blocked tasks */
   unsigned int cs_async;              /* asynchronous management channel (notification) */
   unsigned int cs_sync;               /* synchronous management chnnel */
-  void (*kcall_table[NR_KCALLS])(unsigned int        callnr,
-                        struct k_data     * kdata, 
-                        struct kcall_data * kcall);
+  void (*kcall_table[NR_KCALLS])(unsigned int        callnr, /* kernel call table */
+                                 struct k_data     * kdata, 
+                                 struct kcall_data * kcall);
 };
 
 /* function prototypes */
