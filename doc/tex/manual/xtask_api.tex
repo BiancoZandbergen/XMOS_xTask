@@ -10,6 +10,25 @@ header file: \verb|/include/xtask.h|.
 %-------------------------------------------------------------------------------
 %                              xtask_kernel
 %-------------------------------------------------------------------------------
+\subsection{vc\_buf structure}
+\noindent
+The vc\_buf structure is used to contain the buffer information for communication
+using virtual channels and mailboxes. It contains the following information:
+pointer to start of data buffer, data buffer size and the amount of data in the buffer.
+
+\begin{verbatim}
+struct vc_buf {
+  void *       data;
+  unsigned int buf_size;
+  unsigned int data_size;
+};
+\end{verbatim}
+
+
+
+%-------------------------------------------------------------------------------
+%                              xtask_kernel
+%-------------------------------------------------------------------------------
 \subsection{xtask\_kernel}
 \noindent
 \textbf{void xtask\_kernel(init\_tasks, idle\_task, tick\_rate,
